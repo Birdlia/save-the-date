@@ -28,10 +28,10 @@
     .countdown {
       position: absolute;
       z-index: 1;
-      top: 84.9%;
+      top: 82.8%;
       left: 5%;
       width: 90%;
-      height: 4.5%;
+      height: 5%;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       align-items: center;
@@ -39,8 +39,6 @@
       color: #fff8f4;
     }
     .digit {
-      position: relative;
-      isolation: isolate;
       justify-self: center;
       width: 100%;
       height: 100%;
@@ -54,23 +52,6 @@
       font-weight: 300;
       line-height: 1;
       font-variant-numeric: tabular-nums;
-    }
-    /* A softly feathered crop of nearby blank card texture hides the printed sample digits. */
-    .digit::before {
-      content: "";
-      position: absolute;
-      z-index: -1;
-      left: 50%;
-      top: 0;
-      width: 75%;
-      height: 100%;
-      transform: translateX(-50%);
-      background-image: url("assets/card-red.png");
-      background-size: 100vw 100dvh;
-      background-position: -12% 0%;
-      background-repeat: no-repeat;
-      -webkit-mask-image: radial-gradient(ellipse at center, #000 63%, transparent 100%);
-      mask-image: radial-gradient(ellipse at center, #000 63%, transparent 100%);
     }
     .number {
       display: inline-block;
@@ -86,7 +67,6 @@
         width: min(46.2085dvh, 780px);
         height: 100dvh;
       }
-      .digit::before { background-size: min(46.2085dvh, 780px) 100dvh; }
       .digit { font-size: clamp(22px, 3.15dvh, 49px); }
     }
   </style>
