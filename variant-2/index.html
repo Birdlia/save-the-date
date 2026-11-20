@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#74000d">
+  <meta name="description" content="Save the date — South Okanagan">
+  <title>Save the date — South Okanagan · Red card</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 100%; height: 100%; }
+    body {
+      height: 100svh;
+      height: 100dvh;
+      overflow: hidden;
+      background: #74000d;
+    }
+    .card {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100svh;
+      height: 100dvh;
+      overflow: hidden;
+      isolation: isolate;
+    }
+    .artwork {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
+    }
+    .countdown {
+      position: absolute;
+      z-index: 1;
+      top: 83.35%;
+      left: 5%;
+      width: 90%;
+      height: 4.4%;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      align-items: center;
+      text-align: center;
+      color: #f5e9e9;
+    }
+    .digit {
+      position: relative;
+      isolation: isolate;
+      justify-self: center;
+      width: 64%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 18px;
+      background: #890010;
+      white-space: nowrap;
+      font-family: "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+      font-size: clamp(22px, 6.2vw, 48px);
+      font-style: italic;
+      font-weight: 300;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .number {
+      display: inline-block;
+      transform: scaleX(.72);
+      letter-spacing: -.06em;
+      text-shadow: 0 1px 1px rgb(0 0 0 / 12%);
+    }
+    @media (min-width: 700px) {
+      body { display: grid; place-items: center; }
+      .card {
+        position: relative;
+        inset: auto;
+        width: min(46.2085dvh, 780px);
+        height: 100dvh;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="card" aria-label="Save the date — South Okanagan">
+    <img class="artwork" src="assets/card-red.png" alt="Красная свадебная карточка с фотографиями пары и надписью Save the date — South Okanagan">
+    <div class="countdown" aria-label="Countdown">
+      <span class="digit"><span class="number" id="days" aria-label="Days">--</span></span>
+      <span class="digit"><span class="number" id="hours" aria-label="Hours">--</span></span>
+      <span class="digit"><span class="number" id="minutes" aria-label="Minutes">--</span></span>
+      <span class="digit"><span class="number" id="seconds" aria-label="Seconds">--</span></span>
+    </div>
+  </main>
+  <script src="../event-config.js"></script>
+  <script>
+    (() => {
+      const config = window.EVENT_CONFIG || {};
+      const digits = {
+        days: document.getElementById('days'),
+        hours: document.getElementById('hours'),
+        minutes: document.getElementById('minutes'),
+        seconds: document.getElementById('seconds'),
+      };
+      const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+
+      function eventInstant(date, timeZone) {
+        if (!datePattern.test(date) || !timeZone) return null;
+        const [year, month, day] = date.split('-').map(Number);
+        const intended = Date.UTC(year, month - 1, day);
+        const check = new Date(intended);
+        if (check.getUTCFullYear() !== year || check.getUTCMonth() !== month - 1 ||
+            check.getUTCDate() !== day) return null;
+
+        try {
+          const formatter = new Intl.DateTimeFormat('en-US', {
+            timeZone, year: 'numeric', month: '2-digit', day: '2-digit',
+            hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23',
+          });
+          let instant = intended;
+          for (let i = 0; i < 4; i++) {
+            const parts = Object.fromEntries(formatter.formatToParts(new Date(instant))
+              .filter(part => part.type !== 'literal')
+              .map(part => [part.type, Number(part.value)]));
+            const observed = Date.UTC(parts.year, parts.month - 1, parts.day,
+              parts.hour, parts.minute, parts.second);
+            instant += intended - observed;
+          }
+          return instant;
+        } catch (_) {
+          return null;
+        }
+      }
+
+      const target = eventInstant(config.date, config.timeZone);
+      if (target === null) return;
+
+      function update() {
+        let remaining = Math.max(0, target - Date.now());
+        const days = Math.floor(remaining / 86400000);
+        remaining %= 86400000;
+        const hours = Math.floor(remaining / 3600000);
+        remaining %= 3600000;
+        const minutes = Math.floor(remaining / 60000);
+        const seconds = Math.floor((remaining % 60000) / 1000);
+        digits.days.textContent = String(days).padStart(2, '0');
+        digits.hours.textContent = String(hours).padStart(2, '0');
+        digits.minutes.textContent = String(minutes).padStart(2, '0');
+        digits.seconds.textContent = String(seconds).padStart(2, '0');
+      }
+      update();
+      window.setInterval(update, 1000);
+    })();
+  </script>
+</body>
+</html>
